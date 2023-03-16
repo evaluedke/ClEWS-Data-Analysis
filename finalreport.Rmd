@@ -64,6 +64,8 @@ library(ggplot2)
 library(dplyr)
 library(tibble)
 library(foreach)
+library(GGally)
+
 ```
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
@@ -183,6 +185,142 @@ newenergydata <- bind_rows(AL,AT,BA,BE,BG,CH,CY,CZ,DE,DK,EE,EL,ES,FI,FR,HR,HU,IE
 
 ```{r}
 newenergydata <-read.csv("newenergydata.csv",check.names=FALSE)
+```
+
+```{r}
+#plot energydemand
+ggplot(newenergydata) +
+  geom_point(aes(y = `EDM [MWh]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "Energy Demand [MWh]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
+
+```
+
+```{r}
+#plot solar power
+ggplot(newenergydata) +
+  geom_point(aes(y = `SPV [MW/MW]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "Solar Power [MW/MW]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
+
+```
+
+```{r}
+#plot temperature
+ggplot(newenergydata) +
+  geom_point(aes(y =`TA [K]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "Temperature [K]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
+```
+
+```{r}
+#plot irradiance
+ggplot(newenergydata) +
+  geom_point(aes(y = `GHI [Wm-2]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "GHI [Wm-2]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
+```
+
+```{r}
+#plot hydropower reservoir
+ggplot(newenergydata) +
+  geom_point(aes(y = `HRE [W]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "HRE [W]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+#plot hydropower runoff
+ggplot(newenergydata) +
+  geom_point(aes(y = `HRO [W]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "HRO [W]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+#plot sea level pressure
+ggplot(newenergydata) +
+  geom_point(aes(y = `MSL [Pa]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "MSL [Pa]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+#plot total precipitation 
+ggplot(newenergydata) +
+  geom_point(aes(y = `TP [m]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "TP [m]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+#plot wind power onshore
+ggplot(newenergydata) +
+  geom_point(aes(y = `WON [MW/MW]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "WON [MW/MW]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+#plot wind speed 10m
+ggplot(newenergydata) +
+  geom_point(aes(y = `WS-10m [ms-1]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "WS-10m [ms-1]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+#plot wind speed 100m
+ggplot(newenergydata) +
+  geom_point(aes(y = `WS-100m [ms-1]`, 
+                 x = Date,
+                 col = Country), alpha = 0.5)+
+  labs(x = "Date [a]", y = "WS-100m [ms-1]") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+
+```{r}
+
+Germany <- subset(newenergydata, Country == "DE") 
+Germany$Date <- NULL
+
+ggpairs(Germany,diag = list(continuous="barDiag"))+
+  theme_bw()
+```
+
+```{r}
+
 ```
 
 ### Methods 1: Applications of the linear model (20 points)
