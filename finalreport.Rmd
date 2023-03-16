@@ -16,22 +16,26 @@ output:
     latex_engine: xelatex
 fontsize: 12 pt
 ---
-### Summary (5 points)
-- a short five-sentence abstract of your project 
 
+### Summary (5 points)
+
+-   a short five-sentence abstract of your project
 
 ### Objectives (10 points)
-- What do you wish to analyse and why? 
 
-### Data description and general referencing (5 points) 
+-   What do you wish to analyse and why?
 
-This dataset describes the Climate and energy indicators for Europe from 1979 to present derived from reanalysis and is sourced from the Copernicus climate change service (C3S) (DOI: 10.24381/cds.4bd77450): The parameters include climate variables and indicators from the energy sector which are:
+### Data description and general referencing (5 points)
+
+This dataset describes the climate and energy indicators for Europe from 1979 to present derived from reanalysis and is sourced from the Copernicus climate change service (C3S) (DOI: 10.24381/cds.4bd77450): The parameters include climate variables and indicators from the energy sector which are:
 
 -   Electricity demand (EDM [MWh])
 
 -   Solar photovoltaic power generation (SPV [MW/MW])
 
 -   Surface downwelling shortwave radiation (GHI [Wm-2])
+
+    -   ("Downwelling shortwave radiation quantifies the direct energy from the sun as the sum of all wavelengths [...] Schmid, M., & Read, J.. (2022). Heat Budget of Lakes (pp. 467--473). <https://doi.org/10.1016/b978-0-12-819166-8.00011-6> )
 
 -   Hydro power generation from reservoirs (HRE [W])
 
@@ -57,15 +61,17 @@ We wanted to analyze whether there is a visible difference between windspeed and
 library(tidyverse)
 library(tidymodels)
 library(ggplot2)
-
+library(dplyr)
+library(tibble)
+library(foreach)
 ```
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
-knitr::opts_chunk$set(root.dir = "~/Uni Potsdam/ClEWS/1. Semester/Data Analysis and Management in Earth System Science")
+knitr::opts_chunk$set(root.dir = "C:/Users/User/OneDrive/Dokumente/ClEWS-Data-Analysis")
 ```
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
-setwd("~/Uni Potsdam/ClEWS/1. Semester/Data Analysis and Management in Earth System Science/Data/")
+setwd("C:/Users/User/OneDrive/Dokumente/ClEWS-Data-Analysis")
 ```
 
 ### Preprocessing Data
@@ -73,207 +79,126 @@ setwd("~/Uni Potsdam/ClEWS/1. Semester/Data Analysis and Management in Earth Sys
 ```{r}
 #Load each parameter 
 #electricity demand in MWh (EDM [MWh])
-electricity_demand_his <- read.csv("../../../../../dataen/electricitydemand.csv")
+electricity_demand_his <- read.csv("dataen/electricitydemand.csv")
 
 #global horizontal irradiance in W m-2
-irradiance_his <- read.csv("../../../../../dataen/globalhoritontalirradiance.csv")
+irradiance_his <- read.csv("dataen/globalhoritontalirradiance.csv")
 
 #hydropower reservoir (HRE) in W
-hydropower_reservoir_his <- read.csv("../../../../../dataen/hydropowerreservoir.csv")
+hydropower_reservoir_his <- read.csv("dataen/hydropowerreservoir.csv")
 
 #hydropower run-of-river (HRO) in W
-hydropower_ro_his <- read.csv("../../../../../dataen/hydropowerror.csv")
+hydropower_ro_his <- read.csv("dataen/hydropowerror.csv")
 
 #mean sea level pressure in Pa
-sealevelpressure_his <- read.csv("../../../../../dataen/sealevelpressure.csv")
+sealevelpressure_his <- read.csv("dataen/sealevelpressure.csv")
 
 #solar pv power in MW/MW
-solarpvpwr <- read.csv("../../../../../dataen/solarpvpwr.csv")
+solarpvpwr <- read.csv("dataen/solarpvpwr.csv")
 
 #air temperature in K
-air_temperature_his <- read.csv("../../../../../dataen/airtemperature.csv")
+air_temperature_his <- read.csv("dataen/airtemperature.csv")
 
 #total precipitation in m
-total_pr_his <- read.csv("../../../../../dataen/totalpr.csv")
+total_pr_his <- read.csv("dataen/totalpr.csv")
 
 #wind power onshore in MW/MW
-windpoweronshore_his <- read.csv("../../../../../dataen/windpoweronshore.csv")
+windpoweronshore_his <- read.csv("dataen/windpoweronshore.csv")
 
 #wind speed in 10 m in m s-1
-wind_speed_10_his <- read.csv("../../../../../dataen/windspeed10.csv")
+wind_speed_10_his <- read.csv("dataen/windspeed10.csv")
 
 #wind speed in 100 m in ms-1
-wind_speed_100_his <- read.csv("../../../../../dataen/windspeed100.csv") 
+wind_speed_100_his <- read.csv("dataen/windspeed100.csv") 
 
 ```
 
-Summaries of the wind power generation and wind speed at 100m deliver an overwiew of the parameter for each country. Denmark shows the highest mean in wind speed, while Switzerland has the lowest mean wind speed at 100m. Therefore, it is interesting to compare these countries to Germany.
-
 ```{r}
-summary(windpoweronshore_his)
+#insert missing columns for electricity_demand
+electricity_demand <- electricity_demand_his
+
+electricity_demand <- electricity_demand %>% add_column(AL=0, .after = "Date") %>% add_column(IS=0, .after="IE") %>% add_column(LI=0, .after = "IT") %>% add_column(MT=0, .after="MK") %>% add_column(TR=0, .after="SK")
+
 ```
 
 ```{r}
-summary(wind_speed_100_his)
-```
 
-```{r}
-#select only Germany from each dataframe
-`EDM [MWh]` <- electricity_demand_his %>% select(1,9) 
-colnames(`EDM [MWh]`)[2] <- "EDM [MWh]"
+#add all variables into one dataframe
 
-`GHI [Wm-2]` <- irradiance_his %>% select(1,10)
-colnames(`GHI [Wm-2]`)[2] <- "GHI [Wm-2]"
+#countries <- c("AL","AT","BA","BE","BG","CH","CY","CZ","DE","DK","EE","EL","ES","FI","FR","HR","HU","IE","IS","IT","LI","LT","LU","LV","ME","MK","MT","NL","NO","PL","PT","RO","RS","SE","SI","SK","TR","UK")
 
-`HRE [W]` <- hydropower_reservoir_his %>% select(1,10)
-colnames(`HRE [W]`)[2] <- "HRE [W]"
+#numbers <- c(2:39)
 
-`HRO [W]` <- hydropower_ro_his %>% select(1,10)
-colnames(`HRO [W]`)[2] <- "HRO [W]"
+#for (i in seq_along(numbers)) {
+  
+#  print(paste(numbers[i],countries[i]))
+#}
 
-`MSL [Pa]` <- sealevelpressure_his %>% select(1,10)
-colnames(`MSL [Pa]`)[2] <- "MSL [Pa]"
+#select one Country from each dataframe
+#`EDM [MWh]` <- electricity_demand %>% dplyr::select(1,39) 
+#colnames(`EDM [MWh]`)[2] <- "EDM [MWh]"
 
-`SPV [MW/MW]` <- solarpvpwr %>% select(1,10)
-colnames(`SPV [MW/MW]`)[2] <- "SPV [MW/MW]"
+#`GHI [Wm-2]` <- irradiance_his %>% dplyr::select(1,39)
+#colnames(`GHI [Wm-2]`)[2] <- "GHI [Wm-2]"
 
-`TA [K]` <- air_temperature_his %>% select(1,10)
-colnames(`TA [K]`)[2] <- "TA [K]"
+#`HRE [W]` <- hydropower_reservoir_his %>% dplyr::select(1,39)
+#colnames(`HRE [W]`)[2] <- "HRE [W]"
 
-`TP [m]` <- total_pr_his%>% select(1,10)
-colnames(`TP [m]`)[2] <- "TP [m]"
+#`HRO [W]` <- hydropower_ro_his %>% dplyr::select(1,39)
+#colnames(`HRO [W]`)[2] <- "HRO [W]"
 
-`WON [MW/MW]` <- windpoweronshore_his %>% select(1,10)
-colnames(`WON [MW/MW]`)[2] <- "WON [MW/MW]"
+#`MSL [Pa]` <- sealevelpressure_his %>% dplyr::select(1,39)
+#colnames(`MSL [Pa]`)[2] <- "MSL [Pa]"
 
-`WS-10m [ms-1]` <- wind_speed_10_his %>% select(1,10)
-colnames(`WS-10m [ms-1]`)[2] <- "WS-10m [ms-1]"
+#`SPV [MW/MW]` <- solarpvpwr %>% dplyr::select(1,39)
+#colnames(`SPV [MW/MW]`)[2] <- "SPV [MW/MW]"
 
-`WS-100m [ms-1]` <- wind_speed_100_his %>% select(1,10)
-colnames(`WS-100m [ms-1]`)[2] <- "WS-100m [ms-1]"
+#`TA [K]` <- air_temperature_his %>% dplyr::select(1,39)
+#colnames(`TA [K]`)[2] <- "TA [K]"
+
+#`TP [m]` <- total_pr_his%>% dplyr::select(1,39)
+#colnames(`TP [m]`)[2] <- "TP [m]"
+
+#`WON [MW/MW]` <- windpoweronshore_his %>% dplyr::select(1,39)
+#colnames(`WON [MW/MW]`)[2] <- "WON [MW/MW]"
+
+#`WS-10m [ms-1]` <- wind_speed_10_his %>% dplyr::select(1,39)
+#colnames(`WS-10m [ms-1]`)[2] <- "WS-10m [ms-1]"
+
+#`WS-100m [ms-1]` <- wind_speed_100_his %>% dplyr::select(1,39)
+#colnames(`WS-100m [ms-1]`)[2] <- "WS-100m [ms-1]"
 
 #merge dataframes together by Date
 
-Germany <- Reduce(function(x,y) merge(x,y, all=TRUE), list(`EDM [MWh]`,`GHI [Wm-2]`,`HRE [W]`,`HRO [W]`,`MSL [Pa]`,`SPV [MW/MW]`,`TA [K]`,`TP [m]`,`WON [MW/MW]` ,`WS-10m [ms-1]`,`WS-100m [ms-1]`))
+#UK <- Reduce(function(x,y) merge(x,y, all=TRUE), list(`EDM [MWh]`,`GHI [Wm-2]`,`HRE [W]`,`HRO [W]`,`MSL [Pa]`,`SPV [MW/MW]`,`TA [K]`,`TP [m]`,`WON [MW/MW]` ,`WS-10m [ms-1]`,`WS-100m [ms-1]`))
 
 #add class "Country"
-Germany$Country <- "DE"
-
-```
-
-```{r}
-#select only Switzerland from each dataframe
-`EDM [MWh]` <- electricity_demand_his %>% select(1,6) 
-colnames(`EDM [MWh]`)[2] <- "EDM [MWh]"
-
-`GHI [Wm-2]` <- irradiance_his %>% select(1,7)
-colnames(`GHI [Wm-2]`)[2] <- "GHI [Wm-2]"
-
-`HRE [W]` <- hydropower_reservoir_his %>% select(1,7)
-colnames(`HRE [W]`)[2] <- "HRE [W]"
-
-`HRO [W]` <- hydropower_ro_his %>% select(1,7)
-colnames(`HRO [W]`)[2] <- "HRO [W]"
-
-`MSL [Pa]` <- sealevelpressure_his %>% select(1,7)
-colnames(`MSL [Pa]`)[2] <- "MSL [Pa]"
-
-`SPV [MW/MW]` <- solarpvpwr %>% select(1,7)
-colnames(`SPV [MW/MW]`)[2] <- "SPV [MW/MW]"
-
-`TA [K]` <- air_temperature_his %>% select(1,7)
-colnames(`TA [K]`)[2] <- "TA [K]"
-
-`TP [m]` <- total_pr_his%>% select(1,7)
-colnames(`TP [m]`)[2] <- "TP [m]"
-
-`WON [MW/MW]` <- windpoweronshore_his %>% select(1,7)
-colnames(`WON [MW/MW]`)[2] <- "WON [MW/MW]"
-
-`WS-10m [ms-1]` <- wind_speed_10_his %>% select(1,7)
-colnames(`WS-10m [ms-1]`)[2] <- "WS-10m [ms-1]"
-
-`WS-100m [ms-1]` <- wind_speed_100_his %>% select(1,7)
-colnames(`WS-100m [ms-1]`)[2] <- "WS-100m [ms-1]"
-
-#merge dataframes together by Date
-
-Switzerland <- Reduce(function(x,y) merge(x,y, all=TRUE), list(`EDM [MWh]`,`GHI [Wm-2]`,`HRE [W]`,`HRO [W]`,`MSL [Pa]`,`SPV [MW/MW]`,`TA [K]`,`TP [m]`,`WON [MW/MW]` ,`WS-10m [ms-1]`,`WS-100m [ms-1]`))
-
-#add class "Country"
-Switzerland$Country <- "CH"
-
-```
-
-```{r}
-# select DK
-`EDM [MWh]` <- electricity_demand_his %>% select(1,10) 
-colnames(`EDM [MWh]`)[2] <- "EDM [MWh]"
-
-`GHI [Wm-2]` <- irradiance_his %>% select(1,11)
-colnames(`GHI [Wm-2]`)[2] <- "GHI [Wm-2]"
-
-`HRE [W]` <- hydropower_reservoir_his %>% select(1,11)
-colnames(`HRE [W]`)[2] <- "HRE [W]"
-
-`HRO [W]` <- hydropower_ro_his %>% select(1,11)
-colnames(`HRO [W]`)[2] <- "HRO [W]"
-
-`MSL [Pa]` <- sealevelpressure_his %>% select(1,11)
-colnames(`MSL [Pa]`)[2] <- "MSL [Pa]"
-
-`SPV [MW/MW]` <- solarpvpwr %>% select(1,11)
-colnames(`SPV [MW/MW]`)[2] <- "SPV [MW/MW]"
-
-`TA [K]` <- air_temperature_his %>% select(1,11)
-colnames(`TA [K]`)[2] <- "TA [K]"
-
-`TP [m]` <- total_pr_his%>% select(1,11)
-colnames(`TP [m]`)[2] <- "TP [m]"
-
-`WON [MW/MW]` <- windpoweronshore_his %>% select(1,11)
-colnames(`WON [MW/MW]`)[2] <- "WON [MW/MW]"
-
-`WS-10m [ms-1]` <- wind_speed_10_his %>% select(1,11)
-colnames(`WS-10m [ms-1]`)[2] <- "WS-10m [ms-1]"
-
-`WS-100m [ms-1]` <- wind_speed_100_his %>% select(1,11)
-colnames(`WS-100m [ms-1]`)[2] <- "WS-100m [ms-1]"
+#UK$Country <- "UK"
 
 
-Denmark <- Reduce(function(x,y) merge(x,y, all=TRUE), list(`EDM [MWh]`,`GHI [Wm-2]`,`HRE [W]`,`HRO [W]`,`MSL [Pa]`,`SPV [MW/MW]`,`TA [K]`,`TP [m]`,`WON [MW/MW]` ,`WS-10m [ms-1]`,`WS-100m [ms-1]`))
-
-
-Denmark$Country <- "DK"
-
-#there should be an easier way to do this
-```
-
-```{r}
 #bind dataframes together 
-energydata <- bind_rows(Germany,Switzerland,Denmark)
+
+newenergydata <- bind_rows(AL,AT,BA,BE,BG,CH,CY,CZ,DE,DK,EE,EL,ES,FI,FR,HR,HU,IE,IS,IT,LI,LT,LU,LV,ME,MK,MT,NL,NO,PL,PT,RO,RS,SE,SI,SK,TR,UK)
 ```
 
+```{r}
+newenergydata <-read.csv("newenergydata.csv",check.names=FALSE)
+```
 
 ### Methods 1: Applications of the linear model (20 points)
 
-
-
 ### Methods 2: Applications of tree-based models (20 points)
-
 
 ### Methods 3: Application of statistical testing (10 points)
 
-
 ### Methods 4: Application of XXX (15 points)
-
 
 ### K-means Clustering (15 points)
 
 ```{r}
 #select the variables for classification
 windenergy <- energydata %>%
-  select(Country,`WON [MW/MW]`, `WS-100m [ms-1]`)
+  dplyr::select(Country,`WON [MW/MW]`, `WS-100m [ms-1]`)
 
 #plot windenergy(windspeed)
 ggplot(windenergy) +
@@ -290,7 +215,7 @@ This figure shows the relation between windspeed at 100m and onshore wind power 
 ```{r}
 #Run k-means cluster analysis 
 (kmc <- windenergy %>% 
-   select(- Country) %>% 
+   dplyr::select(- Country) %>% 
    kmeans(centers = 3))
 
 #choose 3 clusters
@@ -379,37 +304,37 @@ Another country - France - can be selected with similar wind speed values to tho
 
 ```{r}
 #select only France from each dataframe
-`EDM [MWh]` <- electricity_demand_his %>% select(1,15) 
+`EDM [MWh]` <- electricity_demand_his %>% dplyr::select(1,15) 
 colnames(`EDM [MWh]`)[2] <- "EDM [MWh]"
 
-`GHI [Wm-2]` <- irradiance_his %>% select(1,16)
+`GHI [Wm-2]` <- irradiance_his %>% dplyr::select(1,16)
 colnames(`GHI [Wm-2]`)[2] <- "GHI [Wm-2]"
 
-`HRE [W]` <- hydropower_reservoir_his %>% select(1,16)
+`HRE [W]` <- hydropower_reservoir_his %>% dplyr::select(1,16)
 colnames(`HRE [W]`)[2] <- "HRE [W]"
 
-`HRO [W]` <- hydropower_ro_his %>% select(1,16)
+`HRO [W]` <- hydropower_ro_his %>% dplyr::select(1,16)
 colnames(`HRO [W]`)[2] <- "HRO [W]"
 
-`MSL [Pa]` <- sealevelpressure_his %>% select(1,16)
+`MSL [Pa]` <- sealevelpressure_his %>% dplyr::select(1,16)
 colnames(`MSL [Pa]`)[2] <- "MSL [Pa]"
 
-`SPV [MW/MW]` <- solarpvpwr %>% select(1,16)
+`SPV [MW/MW]` <- solarpvpwr %>% dplyr::select(1,16)
 colnames(`SPV [MW/MW]`)[2] <- "SPV [MW/MW]"
 
-`TA [K]` <- air_temperature_his %>% select(1,16)
+`TA [K]` <- air_temperature_his %>% dplyr::select(1,16)
 colnames(`TA [K]`)[2] <- "TA [K]"
 
-`TP [m]` <- total_pr_his%>% select(1,16)
+`TP [m]` <- total_pr_his%>% dplyr::select(1,16)
 colnames(`TP [m]`)[2] <- "TP [m]"
 
-`WON [MW/MW]` <- windpoweronshore_his %>% select(1,16)
+`WON [MW/MW]` <- windpoweronshore_his %>% dplyr::select(1,16)
 colnames(`WON [MW/MW]`)[2] <- "WON [MW/MW]"
 
-`WS-10m [ms-1]` <- wind_speed_10_his %>% select(1,16)
+`WS-10m [ms-1]` <- wind_speed_10_his %>% dplyr::select(1,16)
 colnames(`WS-10m [ms-1]`)[2] <- "WS-10m [ms-1]"
 
-`WS-100m [ms-1]` <- wind_speed_100_his %>% select(1,16)
+`WS-100m [ms-1]` <- wind_speed_100_his %>% dplyr::select(1,16)
 colnames(`WS-100m [ms-1]`)[2] <- "WS-100m [ms-1]"
 
 #merge dataframes together by Date
@@ -426,7 +351,7 @@ newenergydata <- bind_rows(energydata,France)
 
 #select the variables for classification
 newwindenergy <- newenergydata %>%
-  select(Country,`WON [MW/MW]`, `WS-100m [ms-1]`)
+  dplyr::select(Country,`WON [MW/MW]`, `WS-100m [ms-1]`)
 
 #plot windenergy(windspeed)
 ggplot(newwindenergy) +
@@ -443,7 +368,7 @@ The "group" France lies inbetween the other countries. Now the analysis can be r
 ```{r}
 #Run k-means cluster analysis 
 (kmc2 <- newwindenergy %>% 
-   select(- Country) %>% 
+   dplyr::select(- Country) %>% 
    kmeans(centers = 4)) #choose 4 clusters
 
 ```
@@ -476,11 +401,8 @@ ggplot(augment(kmc2, newwindenergy)) +
 
 Adding another country changes the cluster centroids and classifications.
 
-
-
-
 ### Discussion and Conclusions (15 points)
 
-- What did you learn from your data analysis? 
-- How could this be improved? 
-- etc. 
+-   What did you learn from your data analysis?
+-   How could this be improved?
+-   etc.
