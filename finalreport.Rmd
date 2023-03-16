@@ -316,11 +316,70 @@ Germany <- subset(newenergydata, Country == "DE")
 Germany$Date <- NULL
 
 ggpairs(Germany,diag = list(continuous="barDiag"))+
-  theme_bw()
+  theme(text = element_text(size = 6),panel.spacing = unit(0.1, "lines"))
 ```
 
 ```{r}
+#precipitation hydropower runoff   
+ggplot(Germany) +
+  geom_point(aes(x = `TP [m]`, 
+                 y= `HRO [W]`,
+                 col = Country), alpha = 0.5)+
+  labs(x = "TP", y = "HRO") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+```{r}
+#windpower generation wind speed   
+ggplot(Germany) +
+  geom_point(aes(x = `WS-10m [ms-1]`, 
+                 y= `WON [MW/MW]`,
+                 col = Country), alpha = 0.5)+
+  labs(x = "WS-10m", y = "WON") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
 
+
+```{r}
+#irradiance solar power  
+ggplot(Germany) +
+  geom_point(aes(x = Germany$`GHI [Wm-2]`, 
+                 y= Germany$`SPV [MW/MW]`,
+                 col = Country), alpha = 0.5)+
+  labs(y = "SPV", x = "GHI") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+```{r}
+#precipitation solar power   
+ggplot(Germany) +
+  geom_point(aes(x = `TP [m]`, 
+                 y= `SPV [MW/MW]`,
+                 col = Country), alpha = 0.5)+
+  labs(x = "TP", y = "SPV") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+```{r}
+#irradiance temperature 
+ggplot(Germany) +
+  geom_point(aes(x = `GHI [Wm-2]`, 
+                 y= `TA [K]`,
+                 col = Country), alpha = 0.5)+
+  labs(x = "GHI", y = "TA") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
+```
+```{r}
+#irradiance precipitation 
+ggplot(Germany) +
+  geom_point(aes(x =`GHI [Wm-2]` , 
+                 y= `TP [m]`,
+                 col = Country), alpha = 0.5)+
+  labs(x = "GHI", y = "TP") + 
+  theme_bw()+
+  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
 
 ### Methods 1: Applications of the linear model (20 points)
