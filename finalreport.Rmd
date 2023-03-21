@@ -290,7 +290,7 @@ germanyplot = ggplot(Germany,aes(x = `GHI [Wm-2]`,
               aes(col = "Germany"),
               fill="darkorchid") +
   scale_colour_manual(name="Country", values="darkorchid")+
-  annotate("text", x = 115, y = 49999999, label = label1, col = "darkorchid")+
+  annotate("text", x = 123, y = 48999999, label = label1, col = "darkorchid",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
@@ -318,7 +318,7 @@ norwayplot = ggplot(Norway,aes(x = `GHI [Wm-2]`,
               aes(col = "Norway"),
               fill="blue") +
   scale_colour_manual(name="", values="blue")+
-  annotate("text", x = 89, y = 580000 , label = label2, col = "blue")+
+  annotate("text", x = 95, y = 580000 , label = label2, col = "blue",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
@@ -347,7 +347,7 @@ spainplot = ggplot(Spain,aes(x = `GHI [Wm-2]`,
               aes(col = "Spain"),
               fill="orange") +
   scale_colour_manual(name="", values="orange")+
-  annotate("text", x = 185, y = 7010000 , label = label3, col = "orange")+
+  annotate("text", x = 191, y = 7010000 , label = label3, col = "orange",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
@@ -368,6 +368,7 @@ ggarrange(germanyplot+
                   axis.ticks.y = element_blank(),
                   axis.title.y = element_blank() ),
           nrow=1)
+
 
 
 
