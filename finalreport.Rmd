@@ -65,6 +65,7 @@ library(dplyr)
 library(tibble)
 library(foreach)
 library(GGally)
+library(egg)
 
 ```
 
@@ -180,135 +181,13 @@ electricity_demand <- electricity_demand %>% add_column(AL=0, .after = "Date") %
 
 #bind dataframes together 
 
-newenergydata <- bind_rows(AL,AT,BA,BE,BG,CH,CY,CZ,DE,DK,EE,EL,ES,FI,FR,HR,HU,IE,IS,IT,LI,LT,LU,LV,ME,MK,MT,NL,NO,PL,PT,RO,RS,SE,SI,SK,TR,UK)
+#newenergydata <- bind_rows(AL,AT,BA,BE,BG,CH,CY,CZ,DE,DK,EE,EL,ES,FI,FR,HR,HU,IE,IS,IT,LI,LT,LU,LV,ME,MK,MT,NL,NO,PL,PT,RO,RS,SE,SI,SK,TR,UK)
 ```
 
 ```{r}
 newenergydata <-read.csv("newenergydata.csv",check.names=FALSE)
 ```
 
-```{r}
-#plot energydemand
-ggplot(newenergydata) +
-  geom_point(aes(y = `EDM [MWh]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "Energy Demand [MWh]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
-
-```
-
-```{r}
-#plot solar power
-ggplot(newenergydata) +
-  geom_point(aes(y = `SPV [MW/MW]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "Solar Power [MW/MW]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
-
-```
-
-```{r}
-#plot temperature
-ggplot(newenergydata) +
-  geom_point(aes(y =`TA [K]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "Temperature [K]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
-```
-
-```{r}
-#plot irradiance
-ggplot(newenergydata) +
-  geom_point(aes(y = `GHI [Wm-2]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "GHI [Wm-2]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1)) 
-```
-
-```{r}
-#plot hydropower reservoir
-ggplot(newenergydata) +
-  geom_point(aes(y = `HRE [W]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "HRE [W]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#plot hydropower runoff
-ggplot(newenergydata) +
-  geom_point(aes(y = `HRO [W]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "HRO [W]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#plot sea level pressure
-ggplot(newenergydata) +
-  geom_point(aes(y = `MSL [Pa]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "MSL [Pa]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#plot total precipitation 
-ggplot(newenergydata) +
-  geom_point(aes(y = `TP [m]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "TP [m]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#plot wind power onshore
-ggplot(newenergydata) +
-  geom_point(aes(y = `WON [MW/MW]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "WON [MW/MW]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#plot wind speed 10m
-ggplot(newenergydata) +
-  geom_point(aes(y = `WS-10m [ms-1]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "WS-10m [ms-1]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#plot wind speed 100m
-ggplot(newenergydata) +
-  geom_point(aes(y = `WS-100m [ms-1]`, 
-                 x = Date,
-                 col = Country), alpha = 0.5)+
-  labs(x = "Date [a]", y = "WS-100m [ms-1]") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
 
 ```{r}
 
@@ -329,6 +208,7 @@ ggplot(Germany) +
   theme_bw()+
   theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
+
 ```{r}
 #windpower generation wind speed   
 ggplot(Germany) +
@@ -340,7 +220,6 @@ ggplot(Germany) +
   theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
 
-
 ```{r}
 #irradiance solar power  
 ggplot(Germany) +
@@ -351,6 +230,7 @@ ggplot(Germany) +
   theme_bw()+
   theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
+
 ```{r}
 #precipitation solar power   
 ggplot(Germany) +
@@ -361,6 +241,7 @@ ggplot(Germany) +
   theme_bw()+
   theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
+
 ```{r}
 #irradiance temperature 
 ggplot(Germany) +
@@ -371,6 +252,7 @@ ggplot(Germany) +
   theme_bw()+
   theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
+
 ```{r}
 #irradiance precipitation 
 ggplot(Germany) +
@@ -382,17 +264,115 @@ ggplot(Germany) +
   theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
 ```
 
-
-
-
-
-
-
-
-
-
 ### Methods 1: Applications of the linear model (20 points)
 
+```{r}
+
+mod <- glm(`GHI [Wm-2]`~ `SPV [MW/MW]` , data=Germany)
+```
+
+```{r}
+intercept <- round(coef(mod)[1],digits=2)
+slope <- round(coef(mod)[2],digits=8)
+
+label1 <- print(paste0("y = ",slope," x + ",intercept))
+  
+```
+
+```{r}
+#irradiance solar power  
+germanyplot = ggplot(Germany,aes(x = `GHI [Wm-2]`, 
+                 y= `SPV [MW/MW]`,
+                 col=Country)) +
+  geom_point(alpha = 0.8,col="darkorchid")+
+  geom_smooth(method = "glm", 
+              formula = y ~ x, 
+              aes(col = "Germany"),
+              fill="darkorchid") +
+  scale_colour_manual(name="Country", values="darkorchid")+
+  annotate("text", x = 115, y = 49999999, label = label1, col = "darkorchid")+
+  labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  theme_bw()+
+  theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
+
+
+```
+```{r}
+
+Norway <- subset(newenergydata, Country == "NO") 
+
+modNO <- glm(`GHI [Wm-2]`~ `SPV [MW/MW]` , data=Norway)
+
+intercept <- round(coef(modNO)[1],digits=2)
+slope <- round(coef(modNO)[2],digits=8)
+
+label2 <- print(paste0("y = ",slope," x + ",intercept))
+
+#irradiance solar power Norway
+norwayplot = ggplot(Norway,aes(x = `GHI [Wm-2]`, 
+                 y= `SPV [MW/MW]`,
+                 col="")) +
+  geom_point(alpha = 0.8,col="blue")+
+  geom_smooth(method = "glm", 
+              formula = y ~ x, 
+              aes(col = "Norway"),
+              fill="blue") +
+  scale_colour_manual(name="", values="blue")+
+  annotate("text", x = 89, y = 580000 , label = label2, col = "blue")+
+  labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  theme_bw()+
+  theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
+
+
+```
+
+```{r}
+
+Spain <- subset(newenergydata,Country =="ES")
+
+modES <- glm(`GHI [Wm-2]`~ `SPV [MW/MW]` , data=Spain)
+
+intercept <- round(coef(modES)[1],digits=2)
+slope <- round(coef(modES)[2],digits=8)
+
+label3 <- print(paste0("y = ",slope," x + ",intercept))
+
+#irradiance solar power Spain
+spainplot = ggplot(Spain,aes(x = `GHI [Wm-2]`, 
+                 y= `SPV [MW/MW]`,
+                 col="")) +
+  geom_point(alpha = 0.8,col="orange")+
+  geom_smooth(method = "glm", 
+              formula = y ~ x, 
+              aes(col = "Spain"),
+              fill="orange") +
+  scale_colour_manual(name="", values="orange")+
+  annotate("text", x = 185, y = 7010000 , label = label3, col = "orange")+
+  labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  theme_bw()+
+  theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
+
+
+```
+
+```{r}
+ggarrange(germanyplot+
+              theme(axis.ticks.x = element_blank(),
+                  axis.title.x = element_blank()),
+          norwayplot+
+              theme(axis.ticks.y = element_blank(),
+                    axis.title.y = element_blank()),
+          spainplot+
+            theme(axis.ticks.x = element_blank(),
+                  axis.title.x = element_blank(), 
+                  axis.ticks.y = element_blank(),
+                  axis.title.y = element_blank() ),
+          nrow=1)
+
+
+
+
+```
 ### Methods 2: Applications of tree-based models (20 points)
 
 ### Methods 3: Application of statistical testing (10 points)
