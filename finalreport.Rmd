@@ -66,6 +66,7 @@ library(tibble)
 library(foreach)
 library(GGally)
 library(egg)
+library(gridExtra)
 
 ```
 
@@ -268,15 +269,18 @@ ggplot(Germany) +
 
 ```{r}
 
-mod <- glm(`GHI [Wm-2]`~ `SPV [MW/MW]` , data=Germany)
+mod <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=Germany)
+summary(mod)
 ```
 
 ```{r}
-intercept <- round(coef(mod)[1],digits=2)
-slope <- round(coef(mod)[2],digits=8)
+intercept <- formatC(coef(mod)[1], format = "e", digits = 2)
+slope <- formatC(coef(mod)[2], format = "e", digits = 2)
+
 
 label1 <- print(paste0("y = ",slope," x + ",intercept))
   
+
 ```
 
 ```{r}
@@ -290,8 +294,9 @@ germanyplot = ggplot(Germany,aes(x = `GHI [Wm-2]`,
               aes(col = "Germany"),
               fill="darkorchid") +
   scale_colour_manual(name="Country", values="darkorchid")+
-  annotate("text", x = 123, y = 48999999, label = label1, col = "darkorchid",size = 8/.pt)+
+  annotate("text", x = 124, y = 49161000, label = label1, col = "darkorchid",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  #ylim(500000,50000000)+
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 
@@ -301,10 +306,10 @@ germanyplot = ggplot(Germany,aes(x = `GHI [Wm-2]`,
 
 Norway <- subset(newenergydata, Country == "NO") 
 
-modNO <- glm(`GHI [Wm-2]`~ `SPV [MW/MW]` , data=Norway)
+modNO <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=Norway)
 
-intercept <- round(coef(modNO)[1],digits=2)
-slope <- round(coef(modNO)[2],digits=8)
+intercept <- formatC(coef(modNO)[1], format = "e", digits = 2)
+slope <- formatC(coef(modNO)[2], format = "e", digits = 2)
 
 label2 <- print(paste0("y = ",slope," x + ",intercept))
 
@@ -318,22 +323,23 @@ norwayplot = ggplot(Norway,aes(x = `GHI [Wm-2]`,
               aes(col = "Norway"),
               fill="blue") +
   scale_colour_manual(name="", values="blue")+
-  annotate("text", x = 95, y = 580000 , label = label2, col = "blue",size = 8/.pt)+
+  annotate("text", x = 94, y = 580000 , label = label2, col = "blue",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  #ylim(500000,50000000)+
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 
-
+summary(modNO)
 ```
 
 ```{r}
 
 Spain <- subset(newenergydata,Country =="ES")
 
-modES <- glm(`GHI [Wm-2]`~ `SPV [MW/MW]` , data=Spain)
+modES <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=Spain)
 
-intercept <- round(coef(modES)[1],digits=2)
-slope <- round(coef(modES)[2],digits=8)
+intercept <- formatC(coef(modES)[1], format = "e", digits = 2)
+slope <- formatC(coef(modES)[2], format = "e", digits = 2)
 
 label3 <- print(paste0("y = ",slope," x + ",intercept))
 
@@ -349,9 +355,11 @@ spainplot = ggplot(Spain,aes(x = `GHI [Wm-2]`,
   scale_colour_manual(name="", values="orange")+
   annotate("text", x = 191, y = 7010000 , label = label3, col = "orange",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  #ylim(500000,50000000)+
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 
+summary(modES)
 
 ```
 
@@ -373,6 +381,24 @@ ggarrange(germanyplot+
 
 
 
+```
+
+```{r}
+subplot <- newenergydata %>% filter(Country=="DE" |
+                                    Country=="NO" |
+                                    Country=="ES")
+
+
+ggplot(subplot,aes(x = `GHI [Wm-2]`, 
+                 y= `SPV [MW/MW]`,
+                 col=Country)) +
+  geom_point(alpha = 0.8)+
+  geom_smooth(method = "glm", 
+              formula = y ~ x) +
+  labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
+  #ylim(500000,50000000)+
+  theme_bw()+
+  theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 ```
 ### Methods 2: Applications of tree-based models (20 points)
 
