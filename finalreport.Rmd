@@ -276,13 +276,13 @@ label3 <- paste0("y = ",slope," x + ",intercept)
 spainplot = ggplot(newenergydata %>% filter(Country =="ES"),aes(x = `GHI [Wm-2]`, 
                  y= `SPV [MW/MW]`,
                  col="")) +
-  geom_point(alpha = 0.8,col="orange")+
+  geom_point(alpha = 0.8,col="hotpink")+
   geom_smooth(method = "glm", 
               formula = y ~ x, 
               aes(col = "Spain"),
-              fill="orange") +
-  scale_colour_manual(name="", values="orange")+
-  annotate("text", x = 191, y = 7010000 , label = label3, col = "orange",size = 8/.pt)+
+              fill="hotpink") +
+  scale_colour_manual(name="", values="hotpink")+
+  annotate("text", x = 191, y = 7010000 , label = label3, col = "hotpink",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
   #ylim(500000,50000000)+
   theme_bw()+
@@ -393,7 +393,66 @@ AIC(modHRO,modMSL,modMV)
 
 ### Methods 2: Applications of tree-based models (20 points)
 
+
 ### Methods 3: Application of statistical testing (10 points)
+
+In this method, a statistical test is applied to investigate the statistical significant differences in the data between the countries for selected variables. Here, the focus is on the global horizontal irradiance and the solar photovoltaic power as in Task 1. Using an ANOVA, the statistical differences between the 10 largest countries are determined for both variables. In the following figures, the variables are visualized through boxplots. 
+```{r}
+colorpalette <- c("darkorchid","hotpink","orchid","turquoise","lightblue","blue","darkgreen","darkseagreen","darkseagreen2","darkseagreen1")
+
+substat <- newenergydata %>% filter(Country == "DE" |
+                      Country == "FR"|
+                      Country == "NO"|
+                      Country == "ES"|
+                      Country == "UK"|
+                      Country == "RO"|
+                      Country == "SE"|
+                      Country == "FI"|
+                      Country == "PL"|
+                      Country == "IT"|
+                      Country == "GR"
+                      )
+ggplot(substat, aes(x = Country, y =`GHI [Wm-2]`, fill =Country)) +
+  geom_boxplot() +
+  labs(y = "GHI [Wm-2]", ) +
+  geom_jitter(position=position_jitter(0.1), alpha =0.3)+
+  theme_bw()+
+  scale_fill_manual(values=colorpalette)
+```
+This figure shows that Spain has the highest irradiance.
+```{r}
+ggplot(substat, aes(x = Country, y =`SPV [MW/MW]`, fill =Country)) +
+  geom_boxplot() +
+  labs(y = "SPV [MW/MW]", ) +
+  geom_jitter(position=position_jitter(0.1), alpha =0.3)+
+  theme_bw()+
+  scale_fill_manual(values=colorpalette)
+
+```
+This figure shows that the solar power generation in Germany is much higher compared to all other countries.
+
+
+In the following, an ANOVA Test is conducted with the 10 countries, analysing if there is a statistical difference between the means of the irradiance for each country. The null hypothesis states that the means of all groups is equal.
+```{r}
+#ANOVA GHI
+modghi <- aov(`GHI [Wm-2]` ~ `Country`,
+                       data = substat)
+
+summary(modghi)
+```
+This summary gives the result of the ANOVA. The "Pr(>F)" presents the p-value, which is needed to reject the null hypothesis. Since it is smaller than 2*10^-16 and therefore smaller than 0.05, the commonly used significance level, it can be concluded that the means of the irradiance are significantly different between the countries. 
+
+Another ANOVA Test is conducted with the 10 countries, analysing if there is a statistical significant difference between the means of the solar power generation for each country. The null hypothesis states that the means of all groups is equal.
+```{r}
+#ANOVA GHI
+modspv <- aov(`SPV [MW/MW]` ~ `Country`,
+                       data = substat)
+
+summary(modspv)
+```
+Again, the summary presents a p-value smaller than 2*10^-16 which concludes that there is a statistical significant difference between the means of the solar power generation for each country and the null hypothesis can be rejected. 
+
+Other test: see if there is a positive development over time of any renewable energy?
 
 ### Methods 4: Application of XXX (15 points)
 
