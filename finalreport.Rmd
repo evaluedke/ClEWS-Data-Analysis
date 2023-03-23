@@ -55,7 +55,7 @@ This dataset describes the climate and energy indicators for Europe from 1979 to
 
 The dataset was subdivided into each parameter. Those had to be combined beforehand. Here, we chose a subset of the Europe Data, focusing only on the countries Germany and it's neighbouring countries Switzerland, and Denmark.
 
-We wanted to analyze whether there is a visible difference between windspeed and onshore windpower generation between these countries. Therefore if the differences are sufficient that each country is classified into one cluster. Using the *K-means clustering* algorithm, the clusters are computed and data points assigned to each cluster.
+We wanted to analyze whether there is a visible difference between windspeed and onshore windpower generation between these countries. Therefore if the differences are sufficient that each country is classified into one cluster. Using the *K-means clustering* algorithm, the clusters are computed and data points assigned to each cluster. annual data
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -66,7 +66,6 @@ library(tibble)
 library(foreach)
 library(GGally)
 library(egg)
-library(gridExtra)
 
 ```
 
@@ -189,102 +188,37 @@ electricity_demand <- electricity_demand %>% add_column(AL=0, .after = "Date") %
 newenergydata <-read.csv("newenergydata.csv",check.names=FALSE)
 ```
 
+```{r}
+#creating a subset for Germany 
+Germany <- subset(newenergydata, Country == "DE") 
+summary(Germany)
+```
 
 ```{r}
-
-Germany <- subset(newenergydata, Country == "DE") 
 Germany$Date <- NULL
-
 ggpairs(Germany,diag = list(continuous="barDiag"))+
   theme(text = element_text(size = 6),panel.spacing = unit(0.1, "lines"))
 ```
 
-```{r}
-#precipitation hydropower runoff   
-ggplot(Germany) +
-  geom_point(aes(x = `TP [m]`, 
-                 y= `HRO [W]`,
-                 col = Country), alpha = 0.5)+
-  labs(x = "TP", y = "HRO") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#windpower generation wind speed   
-ggplot(Germany) +
-  geom_point(aes(x = `WS-10m [ms-1]`, 
-                 y= `WON [MW/MW]`,
-                 col = Country), alpha = 0.5)+
-  labs(x = "WS-10m", y = "WON") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#irradiance solar power  
-ggplot(Germany) +
-  geom_point(aes(x = Germany$`GHI [Wm-2]`, 
-                 y= Germany$`SPV [MW/MW]`,
-                 col = Country), alpha = 0.5)+
-  labs(y = "SPV", x = "GHI") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#precipitation solar power   
-ggplot(Germany) +
-  geom_point(aes(x = `TP [m]`, 
-                 y= `SPV [MW/MW]`,
-                 col = Country), alpha = 0.5)+
-  labs(x = "TP", y = "SPV") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#irradiance temperature 
-ggplot(Germany) +
-  geom_point(aes(x = `GHI [Wm-2]`, 
-                 y= `TA [K]`,
-                 col = Country), alpha = 0.5)+
-  labs(x = "GHI", y = "TA") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
-```{r}
-#irradiance precipitation 
-ggplot(Germany) +
-  geom_point(aes(x =`GHI [Wm-2]` , 
-                 y= `TP [m]`,
-                 col = Country), alpha = 0.5)+
-  labs(x = "GHI", y = "TP") + 
-  theme_bw()+
-  theme(axis.text.x = element_text(angle=90, vjust=.5, hjust=1))
-```
-
 ### Methods 1: Applications of the linear model (20 points)
 
-```{r}
+#### 1st Application
 
+To analyze how the solar photovoltaic power generation depends on the irradiance and is distributed in Europe, three exemplary Countries are chosen for visualization: Germany, since it has the highest solar power generation, Norway and Spain, since they have lower and higher values of global horizontal irradiance, respectively.
+
+```{r}
+#Create General Linear Model for Irradiance and Solar photovoltaic power generation in Germany
 mod <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=Germany)
-summary(mod)
-```
 
-```{r}
 intercept <- formatC(coef(mod)[1], format = "e", digits = 2)
 slope <- formatC(coef(mod)[2], format = "e", digits = 2)
 
-
-label1 <- print(paste0("y = ",slope," x + ",intercept))
-  
+label1 <- paste0("y = ",slope," x + ",intercept)
 
 ```
 
 ```{r}
-#irradiance solar power  
+#plot irradiance solar power  
 germanyplot = ggplot(Germany,aes(x = `GHI [Wm-2]`, 
                  y= `SPV [MW/MW]`,
                  col=Country)) +
@@ -296,25 +230,23 @@ germanyplot = ggplot(Germany,aes(x = `GHI [Wm-2]`,
   scale_colour_manual(name="Country", values="darkorchid")+
   annotate("text", x = 124, y = 49161000, label = label1, col = "darkorchid",size = 8/.pt)+
   labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
-  #ylim(500000,50000000)+
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 
-
 ```
+
 ```{r}
 
-Norway <- subset(newenergydata, Country == "NO") 
-
-modNO <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=Norway)
+#Create General Linear Model for Irradiance and Solar photovoltaic power generation in Norway
+modNO <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=newenergydata %>% filter(Country == "NO"))
 
 intercept <- formatC(coef(modNO)[1], format = "e", digits = 2)
 slope <- formatC(coef(modNO)[2], format = "e", digits = 2)
 
-label2 <- print(paste0("y = ",slope," x + ",intercept))
+label2 <- paste0("y = ",slope," x + ",intercept)
 
 #irradiance solar power Norway
-norwayplot = ggplot(Norway,aes(x = `GHI [Wm-2]`, 
+norwayplot = ggplot(newenergydata %>% filter(Country == "NO"),aes(x = `GHI [Wm-2]`, 
                  y= `SPV [MW/MW]`,
                  col="")) +
   geom_point(alpha = 0.8,col="blue")+
@@ -329,22 +261,19 @@ norwayplot = ggplot(Norway,aes(x = `GHI [Wm-2]`,
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 
-summary(modNO)
 ```
 
 ```{r}
-
-Spain <- subset(newenergydata,Country =="ES")
-
-modES <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=Spain)
+#Create General Linear Model for Irradiance and Solar photovoltaic power generation in Spain
+modES <- glm(`SPV [MW/MW]`~ `GHI [Wm-2]` , data=newenergydata %>% filter(Country =="ES"))
 
 intercept <- formatC(coef(modES)[1], format = "e", digits = 2)
 slope <- formatC(coef(modES)[2], format = "e", digits = 2)
 
-label3 <- print(paste0("y = ",slope," x + ",intercept))
+label3 <- paste0("y = ",slope," x + ",intercept)
 
 #irradiance solar power Spain
-spainplot = ggplot(Spain,aes(x = `GHI [Wm-2]`, 
+spainplot = ggplot(newenergydata %>% filter(Country =="ES"),aes(x = `GHI [Wm-2]`, 
                  y= `SPV [MW/MW]`,
                  col="")) +
   geom_point(alpha = 0.8,col="orange")+
@@ -358,8 +287,6 @@ spainplot = ggplot(Spain,aes(x = `GHI [Wm-2]`,
   #ylim(500000,50000000)+
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
-
-summary(modES)
 
 ```
 
@@ -376,42 +303,93 @@ ggarrange(germanyplot+
                   axis.ticks.y = element_blank(),
                   axis.title.y = element_blank() ),
           nrow=1)
-
-
-
-
-
 ```
--Germany has highest solar photovoltaic power generation 
--spain higher surface downwelling shortwave radiation 
--linear dependance between GHI and SPV
--however, even though spain has more GHI, less SPV -> solar photovoltaic power not as present as in germany (sources?), had potential to generate a lot more solar power
--Norway has lower radiation but much lower solar photovoltaic power generation --> higher potential 
 
+This figure shows that there is a linear relationship between the surface downwelling shortwave radiation and the solar power generation by photovoltaic technology. Germany generally has the highest solar photovoltaic power generation that ranges from 3.87*10\^7 to 4.80* 10\^7 MW/MW. Norway appears to have lower irradiance and much lower values of power generation by solar power. Spain exhibits higher surface downwelling shortwave radiation and higher solar power generation than Norway, but less power generated from solar photovoltaic than Germany. The linear equations obtained by the general linear models indicate that the linear relationship of Germany has the highest slope of 2.66\*10\^5, which means that the power generation increases by that value when the irradiance increases by 1 Wm\^-2. Even though the surface downwelling radiation in Spain is higher as in Germany, the solar power generation is lower, which implies that the solar power generation does not only depend on the direct energy from the sun. It can be assumed that Germany has more solar photovoltaic panels installed than Spain that add to the energy generation. This may lead to the conclusion that the potential for solar power generation in Spain is much larger. When making use of the high irradiance, Spain could potentially generate more solar photovoltaic power than Germany.
+
+#### 2nd Application:
+
+In the second application, the hydropower generation from run-of-river power plants is analyzed using France as an example since they generate the most power in Europe with this technology. A linear model investigates whether there is a linear relationship between annual total precipitation and hydropower generation, as well as the mean sea level pressure.
 
 ```{r}
-subplot <- newenergydata %>% filter(Country=="DE" |
-                                    Country=="NO" |
-                                    Country=="ES")
+modHRO <- glm(`HRO [W]`~`TP [m]`,data=newenergydata %>% filter(Country == "FR"))
+labelHRO <- paste0("y = ",formatC(coef(modHRO)[2], format = "e", digits = 2),
+                    " x + ",formatC(coef(modHRO)[1], format = "e", digits = 2))
 
+#precipitation hydropower runoff   
 
-ggplot(subplot,aes(x = `GHI [Wm-2]`, 
-                 y= `SPV [MW/MW]`,
-                 col=Country)) +
-  geom_point(alpha = 0.8)+
-  geom_smooth(method = "glm", 
-              formula = y ~ x) +
-  labs(y = "Solar photovoltaic power generation [MW/MW]", x = "Surface downwelling shortwave radiation [Wm-2]") + 
-  #ylim(500000,50000000)+
+ggplot(newenergydata %>% filter(Country == "FR"), 
+       aes(x = `TP [m]`, 
+           y= `HRO [W]`)) +
+  geom_point(alpha = 0.8,color="turquoise")+
+  labs(x = "Total precipitation [m]", y = "Hydropower run-of-river [W]") + 
   theme_bw()+
-  theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
+  geom_smooth(method = "glm", 
+              formula = y ~ x,
+              aes(col="France"),
+              fill="turquoise")+
+  scale_colour_manual(name="", values="turquoise")+
+  annotate("text", x = 0.81, y = 50000000, label = labelHRO, col = "turquoise")
 ```
 
-2nd possible application: 
--does SPV only depend on radiation? Multivariate regression? which one? 
--AIC --> which one is better
--plot both in 1 diagram or even 3D 
+```{r}
+France <- newenergydata %>% filter(Country == "FR")
+cor(France$`HRO [W]`,France$`TP [m]`)
+```
 
+The figure shows that there is a positive linear relationship between total precipitation and run-of-river hydropower in France. Increasing the precipitation by 1 m leads to 2.89\*10\^7 W more generated power. There is a correlation coefficient has a value of ~ 0.52 which can be interpreted as a strong positive correlation. 
+
+```{r}
+#mean sea level pressure hydropower runoff   
+modMSL <- glm(`HRO [W]`~ `MSL [Pa]`,data=newenergydata %>% filter(Country == "FR"))
+labelMSL <- paste0("y = ",formatC(coef(modMSL)[2], format = "e", digits = 2),
+                    " x + ",formatC(coef(modMSL)[1], format = "e", digits = 2))
+  
+
+ggplot(newenergydata %>% filter(Country == "FR"), 
+       aes(x = `TP [m]`, 
+           y= `MSL [Pa]`,
+           col=Country)) +
+  geom_point(alpha = 0.8,color="turquoise")+
+  labs(x = "Mean sea level pressure [Pa]", y = "Hydropower run-of-river [W]") + 
+  theme_bw()+
+  geom_smooth(method = "glm", 
+              formula = y ~ x,
+              aes(col="France"),
+              fill="turquoise")+
+  scale_colour_manual(name="", values="turquoise")+
+  annotate("text", x = 0.81, y = 101910, label = labelMSL, col = "turquoise")
+```
+
+Here, the relationship between Mean sea level pressure and hydropower is presented. The regression line indicates that there is a negative correlation between both variables. Increasing the sea level pressure by 1 Pa, decreases the hydropower generation by 1.15\*10\^4 W. However, the plot shows that more data points compared to the previous plot are located beyond the standard errors of the regression line. The Pearson Correlation Coefficient has a value of ~ -0.199, which can be interpreted as a weak negative correlation
+```{r}
+France <- newenergydata %>% filter(Country == "FR")
+cor(France$`HRO [W]`,France$`MSL [Pa]`)
+```
+
+```{r}
+cor(France$`MSL [Pa]`,France$`TP [m]`)
+```
+However, the mean sea level pressure and the total precipitation have a strong negative correlation (correlaiton coefficient ~-0.55). Therefore, they can be treated as multiplicative predictors in a multivariate regression model.To compare the goodness-of-fit of the different models, the Akaike's Information Criterion (AIC) is a determined. The following table depicts the AIC scores of the model that includes the hydropower generation and the precipitation (modHRO), the model with hydropower generation and mean sea level pressure (modMSL), and the multivariate model.The latter has the lowest AIC score which indicates that this is the preferable model.
+
+```{r}
+modMV <- glm(`HRO [W]` ~ `TP [m]`*`MSL [Pa]`  , data = France)
+
+AIC(modHRO,modMSL,modMV)
+```
+
+```{r}
+#ggplot(newenergydata %>% filter(Country == "FR"), 
+#       aes(x = `TP [m]`, 
+#           y= `HRO [W]`)) +
+#  geom_point(alpha = 0.8,color="turquoise")+
+#  labs(x = "Total precipitation [m]", y = "Hydropower run-of-river [W]") + 
+#  theme_bw()+
+#  geom_abline(intercept = coef(modMV)[1],
+#              slope = coef(modMV)[2], col = "turquoise") +
+#  scale_colour_manual(name="", values="turquoise")
+
+```
 
 ### Methods 2: Applications of tree-based models (20 points)
 
