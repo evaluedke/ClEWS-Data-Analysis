@@ -382,6 +382,12 @@ ggarrange(germanyplot+
 
 
 ```
+-Germany has highest solar photovoltaic power generation 
+-spain higher surface downwelling shortwave radiation 
+-linear dependance between GHI and SPV
+-however, even though spain has more GHI, less SPV -> solar photovoltaic power not as present as in germany (sources?), had potential to generate a lot more solar power
+-Norway has lower radiation but much lower solar photovoltaic power generation --> higher potential 
+
 
 ```{r}
 subplot <- newenergydata %>% filter(Country=="DE" |
@@ -400,6 +406,13 @@ ggplot(subplot,aes(x = `GHI [Wm-2]`,
   theme_bw()+
   theme(axis.text.y = element_text(angle=90, vjust=.5, hjust=1),legend.position = "top")
 ```
+
+2nd possible application: 
+-does SPV only depend on radiation? Multivariate regression? which one? 
+-AIC --> which one is better
+-plot both in 1 diagram or even 3D 
+
+
 ### Methods 2: Applications of tree-based models (20 points)
 
 ### Methods 3: Application of statistical testing (10 points)
