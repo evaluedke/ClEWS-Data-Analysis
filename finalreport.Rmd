@@ -27,19 +27,23 @@ fontsize: 12 pt
 
 ### Data description and general referencing (5 points)
 
-This dataset describes the climate and energy indicators for Europe from 1979 to present derived from reanalysis and is sourced from the Copernicus climate change service (C3S) (DOI: 10.24381/cds.4bd77450): The parameters include climate variables and indicators from the energy sector which are:
+This dataset describes the climate and energy indicators for 38 European countries from 1979 to present derived from reanalysis and is sourced from the Copernicus climate change service (C3S) (DOI: 10.24381/cds.4bd77450): The parameters include climate variables and indicators from the energy sector which are:
 
 -   Electricity demand (EDM [MWh])
+
+    -   consumption of electricity
 
 -   Solar photovoltaic power generation (SPV [MW/MW])
 
 -   Surface downwelling shortwave radiation (GHI [Wm-2])
 
-    -   ("Downwelling shortwave radiation quantifies the direct energy from the sun as the sum of all wavelengths [...] Schmid, M., & Read, J.. (2022). Heat Budget of Lakes (pp. 467--473). <https://doi.org/10.1016/b978-0-12-819166-8.00011-6> )
+    -   direct energy from the sun as the sum of all wavelengths (Schmid (2022))
 
 -   Hydro power generation from reservoirs (HRE [W])
 
 -   Hydro power generation from run-of-river (HRO [W])
+
+    -   Hydroelectric generation without a reservoir or water storage
 
 -   2m Air temperature (TA [K])
 
@@ -53,9 +57,7 @@ This dataset describes the climate and energy indicators for Europe from 1979 to
 
 -   Wind speed at 10m (WS-100m [ms-1])
 
-The dataset was subdivided into each parameter. Those had to be combined beforehand. Here, we chose a subset of the Europe Data, focusing only on the countries Germany and it's neighbouring countries Switzerland, and Denmark.
-
-We wanted to analyze whether there is a visible difference between windspeed and onshore windpower generation between these countries. Therefore if the differences are sufficient that each country is classified into one cluster. Using the *K-means clustering* algorithm, the clusters are computed and data points assigned to each cluster. annual data
+The dataset has a temporal resolution of one year and produces a mean value for each country per year. It was subdivided into each parameter. Those had to be combined beforehand.
 
 ```{r echo=FALSE,message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -337,7 +339,7 @@ France <- newenergydata %>% filter(Country == "FR")
 cor(France$`HRO [W]`,France$`TP [m]`)
 ```
 
-The figure shows that there is a positive linear relationship between total precipitation and run-of-river hydropower in France. Increasing the precipitation by 1 m leads to 2.89\*10\^7 W more generated power. There is a correlation coefficient has a value of ~ 0.52 which can be interpreted as a strong positive correlation. 
+The figure shows that there is a positive linear relationship between total precipitation and run-of-river hydropower in France. Increasing the precipitation by 1 m leads to 2.89\*10\^7 W more generated power. There is a correlation coefficient has a value of \~ 0.52 which can be interpreted as a strong positive correlation.
 
 ```{r}
 #mean sea level pressure hydropower runoff   
@@ -361,7 +363,8 @@ ggplot(newenergydata %>% filter(Country == "FR"),
   annotate("text", x = 0.81, y = 101910, label = labelMSL, col = "turquoise")
 ```
 
-Here, the relationship between Mean sea level pressure and hydropower is presented. The regression line indicates that there is a negative correlation between both variables. Increasing the sea level pressure by 1 Pa, decreases the hydropower generation by 1.15\*10\^4 W. However, the plot shows that more data points compared to the previous plot are located beyond the standard errors of the regression line. The Pearson Correlation Coefficient has a value of ~ -0.199, which can be interpreted as a weak negative correlation
+Here, the relationship between Mean sea level pressure and hydropower is presented. The regression line indicates that there is a negative correlation between both variables. Increasing the sea level pressure by 1 Pa, decreases the hydropower generation by 1.15\*10\^4 W. However, the plot shows that more data points compared to the previous plot are located beyond the standard errors of the regression line. The Pearson Correlation Coefficient has a value of \~ -0.199, which can be interpreted as a weak negative correlation
+
 ```{r}
 France <- newenergydata %>% filter(Country == "FR")
 cor(France$`HRO [W]`,France$`MSL [Pa]`)
@@ -370,7 +373,8 @@ cor(France$`HRO [W]`,France$`MSL [Pa]`)
 ```{r}
 cor(France$`MSL [Pa]`,France$`TP [m]`)
 ```
-However, the mean sea level pressure and the total precipitation have a strong negative correlation (correlaiton coefficient ~-0.55). Therefore, they can be treated as multiplicative predictors in a multivariate regression model.To compare the goodness-of-fit of the different models, the Akaike's Information Criterion (AIC) is a determined. The following table depicts the AIC scores of the model that includes the hydropower generation and the precipitation (modHRO), the model with hydropower generation and mean sea level pressure (modMSL), and the multivariate model.The latter has the lowest AIC score which indicates that this is the preferable model.
+
+However, the mean sea level pressure and the total precipitation have a strong negative correlation (correlaiton coefficient \~-0.55). Therefore, they can be treated as multiplicative predictors in a multivariate regression model.To compare the goodness-of-fit of the different models, the Akaike's Information Criterion (AIC) is a determined. The following table depicts the AIC scores of the model that includes the hydropower generation and the precipitation (modHRO), the model with hydropower generation and mean sea level pressure (modMSL), and the multivariate model.The latter has the lowest AIC score which indicates that this is the preferable model.
 
 ```{r}
 modMV <- glm(`HRO [W]` ~ `TP [m]`*`MSL [Pa]`  , data = France)
@@ -393,10 +397,10 @@ AIC(modHRO,modMSL,modMV)
 
 ### Methods 2: Applications of tree-based models (20 points)
 
-
 ### Methods 3: Application of statistical testing (10 points)
 
-In this method, a statistical test is applied to investigate the statistical significant differences in the data between the countries for selected variables. Here, the focus is on the global horizontal irradiance and the solar photovoltaic power as in Task 1. Using an ANOVA, the statistical differences between the 10 largest countries are determined for both variables. In the following figures, the variables are visualized through boxplots. 
+In this method, a statistical test is applied to investigate the statistical significant differences in the data between the countries for selected variables. Here, the focus is on the global horizontal irradiance and the solar photovoltaic power as in Task 1. Using an ANOVA, the statistical differences between the 10 largest countries are determined for both variables. In the following figures, the variables are visualized through boxplots.
+
 ```{r}
 colorpalette <- c("darkorchid","hotpink","orchid","turquoise","lightblue","blue","darkgreen","darkseagreen","darkseagreen2","darkseagreen1")
 
@@ -419,7 +423,9 @@ ggplot(substat, aes(x = Country, y =`GHI [Wm-2]`, fill =Country)) +
   theme_bw()+
   scale_fill_manual(values=colorpalette)
 ```
+
 This figure shows that Spain has the highest irradiance.
+
 ```{r}
 ggplot(substat, aes(x = Country, y =`SPV [MW/MW]`, fill =Country)) +
   geom_boxplot() +
@@ -429,10 +435,11 @@ ggplot(substat, aes(x = Country, y =`SPV [MW/MW]`, fill =Country)) +
   scale_fill_manual(values=colorpalette)
 
 ```
+
 This figure shows that the solar power generation in Germany is much higher compared to all other countries.
 
-
 In the following, an ANOVA Test is conducted with the 10 countries, analysing if there is a statistical difference between the means of the irradiance for each country. The null hypothesis states that the means of all groups is equal.
+
 ```{r}
 #ANOVA GHI
 modghi <- aov(`GHI [Wm-2]` ~ `Country`,
@@ -440,9 +447,11 @@ modghi <- aov(`GHI [Wm-2]` ~ `Country`,
 
 summary(modghi)
 ```
-This summary gives the result of the ANOVA. The "Pr(>F)" presents the p-value, which is needed to reject the null hypothesis. Since it is smaller than 2*10^-16 and therefore smaller than 0.05, the commonly used significance level, it can be concluded that the means of the irradiance are significantly different between the countries. 
+
+This summary gives the result of the ANOVA. The "Pr(\>F)" presents the p-value, which is needed to reject the null hypothesis. Since it is smaller than 2\*10\^-16 and therefore smaller than 0.05, the commonly used significance level, it can be concluded that the means of the irradiance are significantly different between the countries.
 
 Another ANOVA Test is conducted with the 10 countries, analysing if there is a statistical significant difference between the means of the solar power generation for each country. The null hypothesis states that the means of all groups is equal.
+
 ```{r}
 #ANOVA GHI
 modspv <- aov(`SPV [MW/MW]` ~ `Country`,
@@ -450,7 +459,8 @@ modspv <- aov(`SPV [MW/MW]` ~ `Country`,
 
 summary(modspv)
 ```
-Again, the summary presents a p-value smaller than 2*10^-16 which concludes that there is a statistical significant difference between the means of the solar power generation for each country and the null hypothesis can be rejected. 
+
+Again, the summary presents a p-value smaller than 2\*10\^-16 which concludes that there is a statistical significant difference between the means of the solar power generation for each country and the null hypothesis can be rejected.
 
 Other test: see if there is a positive development over time of any renewable energy?
 
@@ -461,3 +471,7 @@ Other test: see if there is a positive development over time of any renewable en
 -   What did you learn from your data analysis?
 -   How could this be improved?
 -   etc.
+
+### References
+
+Schmid, M., & Read, J.. (2022). Heat Budget of Lakes (pp. 467--473). <https://doi.org/10.1016/b978-0-12-819166-8.00011-6>
