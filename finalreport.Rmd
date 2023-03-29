@@ -208,12 +208,6 @@ Germany <- subset(newenergydata, Country == "DE")
 summary(Germany)
 ```
 
-```{r}
-Germany$Date <- NULL
-ggpairs(Germany,diag = list(continuous="barDiag"))+
-  theme(text = element_text(size = 6),panel.spacing = unit(0.1, "lines"))
-```
-
 ### Methods 1: Applications of the linear model (20 points)
 
 #### 1st Application
@@ -372,7 +366,7 @@ ggplot(newenergydata %>% filter(Country == "FR"),
               aes(col="France"),
               fill="turquoise")+
   scale_colour_manual(name="", values="turquoise")+
-  annotate("text", x = 0.81, y = 101910, label = labelMSL, col = "turquoise")
+  annotate("text", x = 0.82, y = 101910, label = labelMSL, col = "turquoise")
 ```
 
 Here, the relationship between Mean sea level pressure and hydropower is presented. The regression line indicates that there is a negative correlation between both variables. Increasing the sea level pressure by 1 Pa, decreases the hydropower generation by 1.15\*10\^4 W. However, the plot shows that more data points compared to the previous plot are located beyond the standard errors of the regression line. The Pearson Correlation Coefficient has a value of \~ -0.199, which can be interpreted as a weak negative correlation
@@ -394,21 +388,11 @@ modMV <- glm(`HRO [W]` ~ `TP [m]`*`MSL [Pa]`  , data = France)
 AIC(modHRO,modMSL,modMV)
 ```
 
-```{r}
-#ggplot(newenergydata %>% filter(Country == "FR"), 
-#       aes(x = `TP [m]`, 
-#           y= `HRO [W]`)) +
-#  geom_point(alpha = 0.8,color="turquoise")+
-#  labs(x = "Total precipitation [m]", y = "Hydropower run-of-river [W]") + 
-#  theme_bw()+
-#  geom_abline(intercept = coef(modMV)[1],
-#              slope = coef(modMV)[2], col = "turquoise") +
-#  scale_colour_manual(name="", values="turquoise")
-
-```
 
 ### Methods 2: Applications of tree-based models (20 points)
+
 ## Regression tree
+
 Identify the combinations of weather variables ( GHI, TA, MSL, TP, WS-10m, WS-100m) that lead to high or low electricity demand (EDM [MWh])
 
 ```{r}
@@ -441,13 +425,11 @@ prp(p_tree3,
 
 ```
 
-
 The most important predictors are WS-100m [ms-1] and WS-10m [ms-1], with importance values of 21 and 20, respectively. The predictor TP [m] is also relatively important, with an importance value of 18. The predictors GHI [Wm-2], TA [K], and MSL [Pa] are less important, with importance values of 17, 16, and 9, respectively.
 
 ## Classification tree
 
-This model should predict whether the energy demand was above or below the median.
-The model is built to predict the EDM_category variable based on the six predictor variables GHI [Wm-2], TA [K], MSL [Pa], TP [m], WS-10m [ms-1], and WS-100m [ms-1].
+This model should predict whether the energy demand was above or below the median. The model is built to predict the EDM_category variable based on the six predictor variables GHI [Wm-2], TA [K], MSL [Pa], TP [m], WS-10m [ms-1], and WS-100m [ms-1].
 
 ```{r}
 # Define the target variable (in this case, high/low energy demand)
@@ -481,7 +463,6 @@ prp(p_tree4_class,
 ```
 
 In this model, the WS-10m [ms-1] is the most important variable, followed by WS-100m [ms-1], TA [K], GHI [Wm-2], TP [m], and MSL [Pa]. These results suggest that wind speed is the most critical factor in predicting energy demand categories, followed by temperature, solar irradiance, and atmospheric pressure.
-
 
 ### Methods 3: Application of statistical testing (10 points)
 
@@ -536,7 +517,7 @@ summary(modghi)
 
 This summary gives the result of the ANOVA. The "Pr(\>F)" presents the p-value, which is needed to reject the null hypothesis. Since it is smaller than 2\*10\^-16 and therefore smaller than 0.05, the commonly used significance level, it can be concluded that the means of the irradiance are significantly different between the countries.
 
-Another ANOVA Test is conducted with the 10 countries, analysing if there is a statistical significant difference between the means of the solar power generation for each country. The null hypothesis states that the means of all groups is equal.
+Another ANOVA Test is conducted with the 10 countries, analyzing if there is a statistical significant difference between the means of the solar power generation for each country. The null hypothesis states that the means of all groups is equal.
 
 ```{r}
 #ANOVA GHI
@@ -548,8 +529,6 @@ summary(modspv)
 
 Again, the summary presents a p-value smaller than 2\*10\^-16 which concludes that there is a statistical significant difference between the means of the solar power generation for each country and the null hypothesis can be rejected.
 
-Other test: see if there is a positive development over time of any renewable energy?
-
 ### Methods 4: Application of Principal Component Analysis (PCA) (15 points)
 
 Principal Component Analysis (PCA) is a statistical technique used to reduce the complexity of high-dimensional datasets. The main goal of PCA is to identify the underlying structure in the data by finding the directions of greatest variation, called principal components, and projecting the data onto these components. This results in a lower-dimensional representation of the data that still retains the majority of the important information.
@@ -557,7 +536,6 @@ Principal Component Analysis (PCA) is a statistical technique used to reduce the
 PCA works by first computing the covariance matrix of the dataset, which measures the degree of linear relationship between pairs of variables. The covariance matrix is then decomposed into its eigenvectors and eigenvalues. The eigenvectors represent the directions of greatest variation in the data, while the eigenvalues represent the magnitude of the variation along each eigenvector.
 
 The eigenvectors and eigenvalues are ordered by their importance, with the eigenvector corresponding to the largest eigenvalue being the first principal component, the eigenvector corresponding to the second largest eigenvalue being the second principal component, and so on. Typically, only a small number of principal components are retained, corresponding to the majority of the variation in the data.
-
 
 ```{r}
 str(newenergydata)
@@ -581,41 +559,28 @@ pca <- prcomp(energy_std)
 # View the results
 summary(pca)
 ```
+
 The first principal component (PC1) explains 31.36% of the total variance in the data, while the second principal component (PC2) explains an additional 26.73%. Together, the first two principal components explain a total of 58.09% of the variance. The third and fourth principal components (PC3 and PC4) explain 16.32% and 8.26% of the variance, respectively.
 
 The output indicates that the majority of the variance in the dataset can be captured using the first few principal components. This suggests that the dimensionality of the dataset can be reduced while still retaining most of the information in the original data. Additionally, the output can be used to identify which variables contribute the most to each principal component, which can provide insights into the underlying patterns and relationships in the data.
 
 ### Discussion and Conclusions (15 points)
 
+This project illustrated how challenging it is working with large data sets since there are many options for what aspects to visualize and what statistical analyses to perform. There are numerous elements which the data set could represent. Furthermore, it showed that a targeted use of statistical tests and analyses is essential in order to achieve valuable results. Defining a research question at the beginning of the project can help to work target-oriented and focused. It is of great importance to thoroughly research the various models that can be applied to a given dataset, as there are numerous methods with differing main emphases. Selecting a suitable model is crucial, as it ensures that the model fits the characteristics and peculiarities of the dataset at hand, and that the most accurate and informative results are obtained. It became apparent how enhanced coding skills significantly facilitate the analysis. For example, being able to write loops leads to faster results and a more efficient work flow. While there is still room for improvement, this data analysis helped in that matter by solving problems we ran into.
 
-    -   This project illustrated how challenging it is working with large data sets since there are many options for what aspects to visualize and what statistical analyses to perform. There are numerous elements which the data set could represent. Furthermore, it showed that a targeted use of statistical tests and analyses is essential in order to achieve valuable results. Defining a research question at the beginning of the project can help to work target-oriented and focused.
-    - It is of great importance to thoroughly research the various models that can be applied to a given dataset, as there are numerous methods with differing main emphases. Selecting a suitable model is crucial, as it ensures that the model fits the characteristics and peculiarities of the dataset at hand, and that the most accurate and informative results are obtained.
-    -   It became apparent how enhanced coding skills significantly facilitate the analysis. For example, being able to write loops leads to faster results and a more efficient work flow. While there is still room for improvement, this data analysis helped in that matter by solving problems we ran into.
+Seeing the European comparison of the absolute generation of renewable power was interesting and was well demonstrated by the visualizations. It became clear how the renewable power generation depends on the meteorological conditions, which are often linear relationships. However, it also showed that the climatic requirements are not the only factors that influence the generation of wind-, solar-, and hydropower as seen i.e. in the comparison of Germany's and Spain's solar power generation. From that we can conclude that policy and infrastructure are strongly influencing the generation of renewable power. It illustrates clearly that based on the climatic conditions, there is much more potential for the generation of renewable energy to increase. However, the dataset only includes the absolute values of generated energy. The analysis could be improved by putting the produced energy into context, e.g. by including the percentage of how much of the total energy production came from solar-, wind-, and hydroenergy. That would make it possible to better compare smaller or lower populated countries with countries larger in area and population, respectively. Because when looking at the generation of solar power for example, it appears that Germany has the highest absolute solar power generation. However when looking at the percentage share of electricity generation through solar power, several European Countries, including e.g. Spain, show higher values than Germany (Jones et al., 2023). Another improvement could be made by including the nuclear and fossil energy generation per country to obtain a more complete picture. Additionally, it would be useful to have a higher resolution in time to see how the climate variables and with that the energy generation vary over the course of a year. The data is also available in a higher resolution, but would require more memory space which is why the resolution is only annual. 
 
+Working and visualizing data like this is crucial for understanding the energy transition which is a pressing issue nowadays that needs to be tackled, to achieve climate targets such as the Paris Agreement. Even though the EU has ambitious goals on expanding renewable energy, the annual wind and solar capacity additions need to double by 2050 in order to achieve the 1.5C goal. In light of the current energy crisis in Europe it is especially important to achieve energy security and independence from other countries which cannot be secured with the use of fossil energy sources. A rapid expansion of renewable energy infrastructure is essential to ensure pleasant climatic living conditions for upcoming generations and ensure an ending of insecure and uncertain fossil fuel imports (Fox et al., 2022).
 
-    -   Seeing the European comparison of the absolute generation of renewable power was interesting and was well demonstrated by the visualizations. It became clear how the renewable power generation depends on the meteorological conditions, which are often linear relationships. However, it also showed that the climatic requirements are not the only factors that influence the generation of wind-, solar-, and hydropower as seen i.e. in the comparison of Germany's and Spain's solar power generation. From that we can conclude that policy and infrastructure are strongly influencing the generation of renewable power. It illustrates clearly that based on the climatic conditions, there is much more potential for the generation of renewable energy to increase.
-
-    -   However, the dataset only includes the absolute values of generated energy. The analysis could be improved by putting the produced energy into context, e.g. by including the percentage of how much of the total energy production came from solar-, wind-, and hydroenergy. That would make it possible to better compare smaller or lower populated countries with countries larger in area and population, respectively. Because when looking at the generation of solar power for example, it appears that Germany has the highest absolute solar power generation. However when looking at the percentage share of electricity generation through solar power, several European Countries, including e.g. Spain, show higher values than Germany (Ember, 2023)
-
-    -   Would be interesting to include nuclear and fossil energy generation per country
-
-    -   Additionally, it would be useful to have a higher resolution in time to see how the climate variables and with that the energy generation vary over the course of a year
-
-    -   Even though it seems that they produce a lot, it is not enough to reach the 1.5°C goal, much more effort needed
-
-    -   Working and visualizing data like this is important for understanding the transition to renewable energy. Looking at data like this is important for understanding energy transition which is an important issue nowadays which needs to be tackled, to achieve climate targets such as the Paris Agreement, which is essential to ensure pleasant living conditions for upcoming generations. In light of the energy crisis in Europe it is especially important to achieve energy security and independance from other countries which cannot be secured with the use of fossil energy sources .
-
-### To Do:
-
--   Farben vereinheitlichen
--   nb file???
 
 ### References
 
 Climate Data Store (2023). Climate and energy indicators for Europe from 1979 to present derived from reanalysis. <https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.4bd77450?tab=overview> , accessed March 25, 2023.
 
-Ember
-
 European Centre for Medium-Range Weather (2023). Climate reanalysis. <https://www.ecmwf.int/en/research/climate-reanalysis> , accessed March 25, 2023.
 
-Schmid, M., & Read, J.. (2022). Heat Budget of Lakes (pp. 467--473). <https://doi.org/10.1016/b978-0-12-819166-8.00011-6>
+Fox, H., Czyzak, P., Brown, S. (2022). Ready, Set, Go: Europe's Race for Wind and Solar. https://ember-climate.org/app/uploads/2022/07/Report_-Ready-Set-Go_-Europes-Race-for-Wind-and-Solar.pdf , accessed March 29, 2023.
+
+Jones, D., Brown, S., Czyzak, P., Broadbent, H., Bruce-Lockhart, C., Dizon, R. et al. (2023). European Electricity Review 2023. https://ember-climate.org/insights/research/european-electricity-review-2023/ , accessed March 29, 2023. 
+
+Schmid, M., & Read, J. (2022). Heat Budget of Lakes (pp. 467--473). <https://doi.org/10.1016/b978-0-12-819166-8.00011-6>
