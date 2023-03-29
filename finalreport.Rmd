@@ -24,6 +24,13 @@ fontsize: 12 pt
 ### Objectives (10 points)
 
 -   What do you wish to analyse and why?
+- zusammenhänge zwischen wetter/energie variablen und Ländervergleich 
+- sehen wo es potential in der erweiterung der erneuerbaren energien gibt? in welchem Bereich ist es sinnvoll energie auszubauen 
+
+-Method 1
+-Method 2 
+-Method 3 
+-Method 4 +1
 
 ### Data description and general referencing (5 points)
 
@@ -460,17 +467,23 @@ modspv <- aov(`SPV [MW/MW]` ~ `Country`,
 summary(modspv)
 ```
 
-Again, the summary presents a p-value smaller than 2\*10\^-16 which concludes that there is a statistical significant difference between the means of the solar power generation for each country and the null hypothesis can be rejected.
+Again, the summary presents a p-value smaller than 2\*10\^-16 which concludes that there is a statistical significant difference between the means of the solar power generation for each country and the null hypothesis can be rejected. 
 
 Other test: see if there is a positive development over time of any renewable energy?
 
 ### Methods 4: Application of XXX (15 points)
 
 ### Discussion and Conclusions (15 points)
-
+- inhaltlich 
 -   What did you learn from your data analysis?
 -   How could this be improved?
 -   etc.
+
+- Allgemein 
+-   What did you learn from your data analysis?
+-   How could this be improved?
+-   etc.
+
 
 ### References
 
