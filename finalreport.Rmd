@@ -8,7 +8,7 @@ output:
     toc: yes
     toc_float: true
   html_notebook: 
-    theme: journal
+    theme: yeti
     toc: true
     toc_float: true
   pdf_document:
@@ -302,8 +302,9 @@ spainplot = ggplot(newenergydata %>% filter(Country =="ES"),aes(x = `GHI [Wm-2]`
 
 ```
 
-```{r fig.align="center"}
-ggarrange(germanyplot+
+```{r warning = FALSE, message = FALSE, fig.align="center"}
+pdf(NULL) #needs to be included so that only one page with the plot is shown
+plotmulti <- ggarrange(germanyplot+
               theme(axis.ticks.x = element_blank(),
                   axis.title.x = element_blank()),
           norwayplot+
@@ -315,6 +316,8 @@ ggarrange(germanyplot+
                   axis.ticks.y = element_blank(),
                   axis.title.y = element_blank() ),
           nrow=1)
+x <- dev.off()
+plotmulti
 ```
 
 This figure shows that there is a linear relationship between the surface downwelling shortwave radiation and the solar power generation by photovoltaic technology. Germany generally has the highest solar photovoltaic power generation that ranges from 3.87\*10\^7 to 4.80\*10\^7 MW/MW. Norway appears to have lower irradiance and much lower values of power generation by solar power. Spain exhibits higher surface downwelling shortwave radiation and higher solar power generation than Norway, but less power generated from solar photovoltaic than Germany. The linear equations obtained by the general linear models indicate that the linear relationship of Germany has the highest slope of 2.66\*10\^5, which means that the power generation increases by that value when the irradiance increases by 1 Wm\^-2. Even though the surface downwelling radiation in Spain is higher as in Germany, the solar power generation is lower, which implies that the solar power generation does not only depend on the direct energy from the sun. It can be assumed that Germany has more solar photovoltaic panels installed than Spain that add to the energy generation. This may lead to the conclusion that the potential for solar power generation in Spain is much larger. When making use of the high irradiance, Spain could potentially generate more solar photovoltaic power than Germany. It is important to note that the linear model is only valid for positive values of surface downwelling shortwave radation. 
@@ -387,6 +390,7 @@ cor(France$`MSL [Pa]`,France$`TP [m]`)
 However, the mean sea level pressure and the total precipitation have a strong negative correlation (correlaiton coefficient \~-0.55). Therefore, they can be treated as multiplicative predictors in a multivariate regression model.To compare the goodness-of-fit of the different models, the Akaike's Information Criterion (AIC) is a determined. The following table depicts the AIC scores of the model that includes the hydropower generation and the precipitation (modHRO), the model with hydropower generation and mean sea level pressure (modMSL), and the multivariate model.The latter has the lowest AIC score which indicates that this is the preferable model.
 
 ```{r}
+#create multivariate linear model
 modMV <- glm(`HRO [W]` ~ `TP [m]`*`MSL [Pa]`  , data = France)
 
 AIC(modHRO,modMSL,modMV)
@@ -472,8 +476,10 @@ In this model, the WS-10m [ms-1] is the most important variable, followed by WS-
 In this method, a statistical test is applied to investigate the statistical significant differences in the data between the countries for selected variables. Here, the focus is on the global horizontal irradiance and the solar photovoltaic power as in Task 1. Using an ANOVA, the statistical differences between the 10 largest countries are determined for both variables. In the following figures, the variables are visualized through boxplots.
 
 ```{r fig.align="center", fig.cap="ES=Spain, IT=Italy, RO=Romania, FR=France, DE=Germany, PL=Poland, UK=United Kingdom, SE=Sweden, NO=Norway, FI=Finland"}
+#create new colorpalette
 colorpalette <- c("darkorchid","orange","dodgerblue2","wheat4","wheat","blue","orchid","wheat3","blue4","darkorchid4")
 
+#create subset with 10 countries
 substat <- newenergydata %>% filter(Country == "DE" |
                       Country == "FR"|
                       Country == "NO"|
@@ -486,9 +492,10 @@ substat <- newenergydata %>% filter(Country == "DE" |
                       Country == "IT"|
                       Country == "GR"
                       )
+#plot boxplot
 ggplot(substat, aes(x = reorder(Country,-`GHI [Wm-2]`,na.rm=TRUE),y=`GHI [Wm-2]`, fill =Country)) +
   geom_boxplot() +
-  labs(y = "GHI [Wm-2]", x="Country") +
+  labs(y = " Surface downwelling shortwave radiation [Wm-2]", x="Country") +
   geom_jitter(position=position_jitter(0.1), alpha =0.3)+
   theme_bw()+
   theme(legend.position = "none")+
@@ -497,10 +504,11 @@ ggplot(substat, aes(x = reorder(Country,-`GHI [Wm-2]`,na.rm=TRUE),y=`GHI [Wm-2]`
 
 This figure shows that Spain has the highest irradiance.
 
-```{r fig.align="center",fig.cap="DE=Germany, ES=Spain, FI=Finland, FR=France, IT=Italy, NO=Norway, PL=Poland, RO=Romania, SE=Sweden, UK=United Kingdom"}
-ggplot(substat, aes(x = Country, y =`SPV [MW/MW]`, fill =Country)) +
+```{r fig.align="center",fig.cap="DE=Germany, IT=Italy, FR=France, ES=Spain, PL=Poland, RO=Romania, NO=Norway, SE=Sweden, FI=Finland, UK=United Kingdom"}
+#plot boxplot solar power generation
+ggplot(substat,aes(x = reorder(Country,-`SPV [MW/MW]`,na.rm=TRUE),y=`SPV [MW/MW]`, fill =Country)) +
   geom_boxplot() +
-  labs(y = "SPV [MW/MW]", ) +
+  labs(y = "Solar photovoltaic power generation [MW/MW]", x="Country") +
   geom_jitter(position=position_jitter(0.1), alpha =0.3)+
   theme_bw()+
   theme(legend.position = "none")+
@@ -525,7 +533,7 @@ This summary gives the result of the ANOVA. The "Pr(\>F)" presents the p-value, 
 Another ANOVA Test is conducted with the 10 countries, analyzing if there is a statistical significant difference between the means of the solar power generation for each country. The null hypothesis states that the means of all groups is equal.
 
 ```{r}
-#ANOVA GHI
+#ANOVA SPV
 modspv <- aov(`SPV [MW/MW]` ~ `Country`,
                        data = substat)
 
